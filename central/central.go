@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-
+	"strconv"
 	"time"
 
 	pb "Laboratorio1Distribuidos/proto"
@@ -20,6 +20,8 @@ var (
 	puertos  = [4]string{":50051", ":50055", ":50059", ":50063"}
 	equipo1_ = true //disponibilidad
 	equipo2_ = true
+	cont=1
+	cont2=1
 )
 
 func failOnError(err error, msg string) {
@@ -40,7 +42,9 @@ func main() {
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
-
+	f, errf := os.Create("SOLICITUDES.txt")
+	check(errf)
+    defer f.Close()
 	q, err := ch.QueueDeclare(
 		helpQueue, // name
 		false,     // durable
@@ -127,6 +131,7 @@ func main() {
 					//Si el estallido está contenido, se cierra la conexión con el lab
 					if res.Status.String() == "NOLISTO" {
 						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
+						cont=cont+1
 						time.Sleep(5 * time.Second) //espera de 5 segundos
 						primeraLlegada = false
 					} else {
@@ -134,6 +139,8 @@ func main() {
 						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
 						log.Println("Retorno a Central " + res.NombreEscuadron + ", Conexión Laboratorio" + resDisp.NombreLab + "Cerrada")
 						equipo1_ = true //vuelve a quedar disponible
+						f.WriteString(resDisp.NombreLab+";"+strconv.Itoa(cont)+"\n")
+						cont=1
 						connS.Close()   //Se cierra la conexión
 					}
 				}
@@ -164,6 +171,7 @@ func main() {
 					//Si el estallido está contenido, se cierra la conexión con el lab
 					if res.Status.String() == "NOLISTO" {
 						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String() + resDisp.Equipox)
+						cont2=cont2+1
 						time.Sleep(5 * time.Second) //espera de 5 segundos
 						primeraLlegada = false
 					} else {
@@ -171,72 +179,39 @@ func main() {
 						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
 						log.Println("Retorno a Central " + res.NombreEscuadron + ", Conexión Laboratorio" + resDisp.NombreLab + "Cerrada")
 						equipo2_ = true //vuelve a quedar disponible
+						f.WriteString(resDisp.NombreLab+";"+strconv.Itoa(cont2)+"\n")
+						cont2=1
 						connS.Close()   //Se cierra la conexión
 					}
 				}
 			}
 		}()
 
-		// else if resDisp.Equipox == "NOHAYESCUADRA" {
-		// 	/*La idea es q Solo se consuman msg de rabbit cuando exista al menos un equipo
-		// 	disponible en la central*/
-		// 	log.Println("NOHAYESCUADRA")
-		// }
-
-		// go func() {
-		// 	// Fin ejecucion programa
-		// 	// Capturar ctrl + c
-		// 	c := make(chan os.Signal, 1)
-		// 	signal.Notify(c, os.Interrupt)
-
-		// 	for sig := range c {
-
-		// 		log.Println(sig)
-		// 		// Proto mande msg manera sincrona a todos los labs
-		// 		resFin, errFin := serviceCliente.FinPrograma(
-		// 			context.Background(),
-		// 			&pb.MessageTermino{
-		// 				EndSignal: true,
-		// 				MsgFin:    "Lab termine su ejecucion",
-		// 			})
-		// 		if errFin != nil {
-		// 			panic("No se puede crear el mensaje " + err.Error())
-		// 		}
-
-		// 		//lab envian señal de vuelta -> 4 señales antes de morir
-		// 		log.Println(resFin.MsgFin)
-		// 		// sig is a ^C, handle it
-		// 		time.Sleep(1 * time.Second)
-		// 		//os.Exit(1)
-		// 	}
-
-		// 	// lab confirman
-		// 	// se terminan de ejecutar
-
-		// }()
-
+		
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt)
 		go func() {
 			for sig := range c {
 				// sig is a ^C, handle it
 				// Proto mande msg manera sincrona a todos los labs
-				// resFin, errFin := serviceCliente.FinPrograma(
-				// 	context.Background(),
-				// 	&pb.MessageTermino{
-				// 		EndSignal: true,
-				// 		MsgFin:    "Lab termine su ejecucion",
-				// 	})
+				
+				r,_:=serviceCliente.FinPrograma(
+					context.Background(),
+					&pb.MessageTermino{
+						EndSignal: true,
+						MsgFin:    "Lab termine su ejecucion",
+					})
 				// if errFin != nil {
-				// 	panic("No se puede crear el mensaje " + err.Error())
-				// }
-				// //lab envian señal de vuelta -> 4 señales antes de morir
-				// log.Println(resFin.MsgFin)
-				// log.Println(sig)
-				// if resFin.EndSignal {
-				// 	log.Println("SEACABO!!")
-				// 	//os.Exit(1)
-				// }
+				//  	panic("No se puede crear el mensaje " + err.Error())
+				//  }
+				//lab envian señal de vuelta -> 4 señales antes de morir
+				//log.Println(resFin.MsgFin)
+				//log.Println(sig)
+				time.Sleep(2*time.Second)
+				log.Println(r)
+				log.Println("SEACABO!!")
+				os.Exit(1)
+				
 				log.Println(sig)
 			}
 		}()
@@ -244,4 +219,10 @@ func main() {
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
+}
+	
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
 }

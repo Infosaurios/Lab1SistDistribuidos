@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net"
 	"time"
+	"os"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
@@ -79,7 +80,9 @@ func (s *server) FinPrograma(ctx context.Context, msgCentral *pb.MessageTermino)
 	msgACentral := ""
 	if msgCentral.EndSignal {
 		msgACentral = labName + " a terminado su ejecución"
-		//os.Exit(1)
+		log.Println(msgACentral)
+		os.Exit(1)
+		return &pb.MessageTermino{EndSignal: true, MsgFin: msgACentral}, nil
 	}
 	return &pb.MessageTermino{EndSignal: true, MsgFin: msgACentral}, nil
 }
