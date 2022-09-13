@@ -22,6 +22,9 @@ var (
 	equipo2_ = true
 	cont=1
 	cont2=1
+	helpQueue = "SOS"       //Nombre de la cola
+	hostQ     = "localhost" //Host de RabbitMQ 172.17.0.1
+	hostS     = "localhost" //Host de un Laboratorio
 )
 
 func failOnError(err error, msg string) {
@@ -32,9 +35,6 @@ func failOnError(err error, msg string) {
 
 func main() {
 
-	helpQueue := "SOS"                                              //Nombre de la cola
-	hostQ := "localhost"                                            //Host de RabbitMQ 172.17.0.1
-	hostS := "localhost"                                            //Host de un Laboratorio
 	conn, err := amqp.Dial("amqp://guest:guest@" + hostQ + ":5672") //Conexion con RabbitMQ
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -108,13 +108,11 @@ func main() {
 		//cambia su valor a false => equipo está ocupado
 
 		go func() {
-
 			if resDisp.Equipox == "Escuadra1" {
 				equipo1_ = false
 				primeraLlegada := true
 				escuadronNoListo := true
 				log.Println("Se envía " + resDisp.Equipox + " a Laboratorio " + resDisp.NombreLab)
-
 				for escuadronNoListo {
 					//Se manda el escuadron al lab
 					res, err := serviceCliente.ContencionStatus(
@@ -126,7 +124,6 @@ func main() {
 					if err != nil {
 						panic("No se puede crear el mensaje " + err.Error())
 					}
-
 					//Se recibe el estado de contencion y nombre del escuadron
 					//Si el estallido está contenido, se cierra la conexión con el lab
 					if res.Status.String() == "NOLISTO" {
@@ -144,7 +141,6 @@ func main() {
 						connS.Close()   //Se cierra la conexión
 					}
 				}
-
 			}
 		}()
 
@@ -154,7 +150,6 @@ func main() {
 				primeraLlegada := true
 				escuadronNoListo := true
 				log.Println("Se envía " + resDisp.Equipox + " a Laboratorio " + resDisp.NombreLab)
-
 				for escuadronNoListo {
 					//Se manda el escuadron al lab
 					res, err := serviceCliente.ContencionStatus(
@@ -166,11 +161,10 @@ func main() {
 					if err != nil {
 						panic("No se puede crear el mensaje " + err.Error())
 					}
-
 					//Se recibe el estado de contencion y nombre del escuadron
 					//Si el estallido está contenido, se cierra la conexión con el lab
 					if res.Status.String() == "NOLISTO" {
-						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String() + resDisp.Equipox)
+						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
 						cont2=cont2+1
 						time.Sleep(5 * time.Second) //espera de 5 segundos
 						primeraLlegada = false
