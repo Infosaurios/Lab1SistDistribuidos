@@ -4,8 +4,7 @@ import (
 	pb "Laboratorio1Distribuidos/proto"
 	"context"
 
-	//"fmt"
-	"log"
+	"fmt"
 	"math/rand"
 	"net"
 	"time"
@@ -16,13 +15,13 @@ import (
 )
 
 var (
-	labName    = "labKampala" //nombre del laboratorio
+	labName    = "Kampala - Uganda" //nombre del laboratorio
 	msgEnviado = false
 )
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+		fmt.Println(err)
 	}
 }
 
@@ -40,16 +39,16 @@ func (s *server) ContencionStatus(ctx context.Context, msg *pb.EquipoEnviadoPorC
 	ecs := pb.Contencion_NOLISTO //ecs estado de contencion
 
 	if msg.PrimeraLlegada {
-		log.Println("Llega " + equipoEnviadoPorLaCentral + ", conteniendo estallido...")
+		fmt.Println("Llega " + equipoEnviadoPorLaCentral + ", conteniendo estallido...")
 	} else {
-		log.Println("conteniendo estallido...")
+		fmt.Println("Conteniendo estallido...")
 	}
 
 	//Se evalua estado de contencion
 	if contencion() {
 		ecs = pb.Contencion_LISTO
 		msgEnviado = false
-		log.Println("Estallido contenido," + equipoEnviadoPorLaCentral + " retornando...")
+		fmt.Println("Estallido contenido," + equipoEnviadoPorLaCentral + " retornando...")
 	} else {
 		ecs = pb.Contencion_NOLISTO
 	}
@@ -67,9 +66,9 @@ El lab retorna un msg con el nombre del escuadron a usar y el nombre del lab
 func (s *server) CheckDispEscuadron(ctx context.Context, msg *pb.Escuadron) (*pb.EscuadronUsar, error) {
 	equipo_a_usar := ""
 	if msg.Equipo1 {
-		equipo_a_usar = "Escuadra1"
+		equipo_a_usar = "Escuadra 1"
 	} else if msg.Equipo2 {
-		equipo_a_usar = "Escuadra2"
+		equipo_a_usar = "Escuadra 2"
 	} else {
 		equipo_a_usar = "NOHAYESCUADRA"
 	}
@@ -78,12 +77,9 @@ func (s *server) CheckDispEscuadron(ctx context.Context, msg *pb.Escuadron) (*pb
 
 func (s *server) FinPrograma(ctx context.Context, msgCentral *pb.MessageTermino) (*pb.MessageTermino, error) {
 	msgACentral := ""
-	if msgCentral.EndSignal {
-		msgACentral = labName + " a terminado su ejecución"
-		log.Println(msgACentral)
-		os.Exit(1)
-		return &pb.MessageTermino{EndSignal: true, MsgFin: msgACentral}, nil
-	}
+	msgACentral = labName + " a terminado su ejecución"
+	fmt.Println(msgACentral)
+	os.Exit(1)
 	return &pb.MessageTermino{EndSignal: true, MsgFin: msgACentral}, nil
 }
 
@@ -131,7 +127,7 @@ func main() {
 	//msgEnviado := false
 
 	for {
-		//log.Println("msgenviado", msgEnviado)
+		//fmt.Println("msgenviado", msgEnviado)
 		if !msgEnviado {
 
 			//Mensaje enviado a la cola de RabbitMQ (Llamado de emergencia)
@@ -163,7 +159,7 @@ func Estallido(lab_name string) string {
 	for range c {
 		estadoEstallido = statusUpdateEstallido()
 		if estadoEstallido {
-			log.Println("SOS Enviado a Central. Esperando respuesta...")
+			fmt.Println("SOS Enviado a Central. Esperando respuesta...")
 			return lab_name
 		}
 	}
@@ -180,10 +176,10 @@ func statusUpdateEstallido() bool {
 
 	if random < 5 {
 		estallido = true //true
-		log.Println("Analizando estado Laboratorio: [ESTALLIDO]")
+		fmt.Println("Analizando estado Laboratorio: [ESTALLIDO]")
 	} else {
 		estallido = false //false
-		log.Println("Analizando estado Laboratorio: [OK]")
+		fmt.Println("Analizando estado Laboratorio: [OK]")
 	}
 
 	return estallido
@@ -201,10 +197,10 @@ func contencion() bool {
 	random := rand.Intn(max-min) + min
 	if random < 4 {
 		contencion = true
-		log.Println("Revisando estado Escuadrón: [ LISTO ]")
+		fmt.Println("Revisando estado Escuadrón: [LISTO]")
 	} else {
 		contencion = false
-		log.Println("Revisando estado Escuadrón: [ NO LISTO ]")
+		fmt.Println("Revisando estado Escuadrón: [NO LISTO]")
 	}
 
 	return contencion

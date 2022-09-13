@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"strconv"
@@ -29,7 +28,7 @@ var (
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+		fmt.Println(err)
 	}
 }
 
@@ -74,13 +73,13 @@ func main() {
 		labName := string(delivery.Body)
 		fmt.Println("Mensaje asíncrono de laboratorio " + labName + " leído") //obtiene el primer mensaje de la cola
 
-		if labName == "labRenca" {
+		if labName == "Renca (la lleva) - Chile" {
 			port = puertos[0]
-		} else if labName == "labPohang" {
+		} else if labName == "Pohang - Korea" {
 			port = puertos[1]
-		} else if labName == "labPripiat" {
+		} else if labName == "Pripiat - Rusia" {
 			port = puertos[2]
-		} else if labName == "labKampala" {
+		} else if labName == "Kampala - Uganda" {
 			port = puertos[3]
 		}
 		/** Crea la conexion sincrona con el laboratorio **/
@@ -108,11 +107,11 @@ func main() {
 		//cambia su valor a false => equipo está ocupado
 
 		go func() {
-			if resDisp.Equipox == "Escuadra1" {
+			if resDisp.Equipox == "Escuadra 1" {
 				equipo1_ = false
 				primeraLlegada := true
 				escuadronNoListo := true
-				log.Println("Se envía " + resDisp.Equipox + " a Laboratorio " + resDisp.NombreLab)
+				fmt.Println("Se envía " + resDisp.Equipox + " a Laboratorio " + resDisp.NombreLab)
 				for escuadronNoListo {
 					//Se manda el escuadron al lab
 					res, err := serviceCliente.ContencionStatus(
@@ -127,14 +126,14 @@ func main() {
 					//Se recibe el estado de contencion y nombre del escuadron
 					//Si el estallido está contenido, se cierra la conexión con el lab
 					if res.Status.String() == "NOLISTO" {
-						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
+						fmt.Println("Status " + res.NombreEscuadron + ": " + "["+res.Status.String()+"]")
 						cont=cont+1
 						time.Sleep(5 * time.Second) //espera de 5 segundos
 						primeraLlegada = false
 					} else {
 						escuadronNoListo = false
-						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
-						log.Println("Retorno a Central " + res.NombreEscuadron + ", Conexión Laboratorio" + resDisp.NombreLab + "Cerrada")
+						fmt.Println("Status " + res.NombreEscuadron + ": " + "["+res.Status.String()+"]")
+						fmt.Println("Retorno a Central " + res.NombreEscuadron + ", Conexión Laboratorio " + resDisp.NombreLab + " Cerrada")
 						equipo1_ = true //vuelve a quedar disponible
 						f.WriteString(resDisp.NombreLab+";"+strconv.Itoa(cont)+"\n")
 						cont=1
@@ -145,11 +144,11 @@ func main() {
 		}()
 
 		go func() {
-			if resDisp.Equipox == "Escuadra2" {
+			if resDisp.Equipox == "Escuadra 2" {
 				equipo2_ = false
 				primeraLlegada := true
 				escuadronNoListo := true
-				log.Println("Se envía " + resDisp.Equipox + " a Laboratorio " + resDisp.NombreLab)
+				fmt.Println("Se envía " + resDisp.Equipox + " a Laboratorio " + resDisp.NombreLab)
 				for escuadronNoListo {
 					//Se manda el escuadron al lab
 					res, err := serviceCliente.ContencionStatus(
@@ -164,14 +163,14 @@ func main() {
 					//Se recibe el estado de contencion y nombre del escuadron
 					//Si el estallido está contenido, se cierra la conexión con el lab
 					if res.Status.String() == "NOLISTO" {
-						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
+						fmt.Println("Status " + res.NombreEscuadron + ": " + "["+res.Status.String()+"]")
 						cont2=cont2+1
 						time.Sleep(5 * time.Second) //espera de 5 segundos
 						primeraLlegada = false
 					} else {
 						escuadronNoListo = false
-						log.Println("Status " + res.NombreEscuadron + ": " + res.Status.String())
-						log.Println("Retorno a Central " + res.NombreEscuadron + ", Conexión Laboratorio" + resDisp.NombreLab + "Cerrada")
+						fmt.Println("Status " + res.NombreEscuadron + ": " + "["+res.Status.String()+"]")
+						fmt.Println("Retorno a Central " + res.NombreEscuadron + ", Conexión Laboratorio " + resDisp.NombreLab + " Cerrada")
 						equipo2_ = true //vuelve a quedar disponible
 						f.WriteString(resDisp.NombreLab+";"+strconv.Itoa(cont2)+"\n")
 						cont2=1
@@ -199,19 +198,19 @@ func main() {
 				//  	panic("No se puede crear el mensaje " + err.Error())
 				//  }
 				//lab envian señal de vuelta -> 4 señales antes de morir
-				//log.Println(resFin.MsgFin)
-				//log.Println(sig)
-				time.Sleep(2*time.Second)
-				log.Println(r)
-				log.Println("SEACABO!!")
-				os.Exit(1)
+				//fmt.Println(resFin.MsgFin)
+				//fmt.Println(sig)
+				time.Sleep(1*time.Second)
 				
-				log.Println(sig)
+				fmt.Println("SEACABO!!")
+				os.Exit(1)
+				fmt.Println(r)
+				fmt.Println(sig)
 			}
 		}()
 	}
 
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	fmt.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
 }
 	
