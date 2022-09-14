@@ -23,7 +23,7 @@ var (
 	cont2=1
 	helpQueue = "SOS"       //Nombre de la cola
 	hostQ     = "localhost" //Host de RabbitMQ 172.17.0.1
-	hostS     = "dist094" //Host de un Laboratorio
+	hostS     = [4]string{"dist093","dist094","dist095","dist096"} //Host de un Laboratorio
 )
 
 func failOnError(err error, msg string) {
@@ -67,6 +67,7 @@ func main() {
 
 	var forever chan struct{}
 	port := "" //puerto de la conexion con el laboratorio
+	host:=""
 
 	for delivery := range chDelivery {
 
@@ -75,12 +76,16 @@ func main() {
 
 		if labName == "Renca (la lleva) - Chile" {
 			port = puertos[0]
+			host = hostS[0]
 		} else if labName == "Pohang - Korea" {
 			port = puertos[1]
+			host = hostS[1]
 		} else if labName == "Pripiat - Rusia" {
 			port = puertos[2]
+			host = hostS[2]
 		} else if labName == "Kampala - Uganda" {
 			port = puertos[3]
+			host = hostS[3]
 		}
 		/** Crea la conexion sincrona con el laboratorio **/
 		connS, err := grpc.Dial(hostS+port, grpc.WithInsecure())
