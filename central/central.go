@@ -23,7 +23,7 @@ var (
 	cont2=1
 	helpQueue = "SOS"       //Nombre de la cola
 	hostQ     = "localhost" //Host de RabbitMQ 172.17.0.1
-	hostS     = "localhost" //Host de un Laboratorio
+	hostS     = "dist094" //Host de un Laboratorio
 )
 
 func failOnError(err error, msg string) {

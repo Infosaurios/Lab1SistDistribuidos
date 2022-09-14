@@ -85,7 +85,7 @@ func (s *server) FinPrograma(ctx context.Context, msgCentral *pb.MessageTermino)
 
 func main() {
 	helpQueue := "SOS"   //nombre de la cola
-	hostQ := "localhost" //ip del servidor de RabbitMQ 172.17.0.1
+	hostQ := "dist093" //ip del servidor de RabbitMQ 172.17.0.1
 
 	/******************Conexión cola síncrona (proto)******************/
 	go func() {
@@ -103,7 +103,7 @@ func main() {
 
 	/******************Conexión con Rabbitmq******************/
 
-	conn, err := amqp.Dial("amqp://guest:guest@" + hostQ + ":5672") //conexion con RabbitMQ
+	conn, err := amqp.Dial("amqp://test:test@" + hostQ + ":5672") //conexion con RabbitMQ
 
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
