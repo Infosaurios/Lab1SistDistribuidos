@@ -88,7 +88,7 @@ func main() {
 			host = hostS[3]
 		}
 		/** Crea la conexion sincrona con el laboratorio **/
-		connS, err := grpc.Dial(hostS+port, grpc.WithInsecure())
+		connS, err := grpc.Dial(host+port, grpc.WithInsecure())
 
 		if err != nil {
 			panic("No se pudo conectar con el servidor" + err.Error())
