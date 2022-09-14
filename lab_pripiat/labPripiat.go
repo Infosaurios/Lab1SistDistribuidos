@@ -1,7 +1,7 @@
 package main
 
 import (
-	pb "Laboratorio1Distribuidos/proto"
+	pb "Tarea1-Grupo24/proto"
 	"context"
 
 	"fmt"
@@ -74,7 +74,7 @@ func (s *server) CheckDispEscuadron(ctx context.Context, msg *pb.Escuadron) (*pb
 	}
 	return &pb.EscuadronUsar{Equipox: equipo_a_usar, NombreLab: labName}, nil
 }
-
+//Recibe mensaje de la central cuando esta termina su ejecucion y termina la ejecucion del laboratorio
 func (s *server) FinPrograma(ctx context.Context, msgCentral *pb.MessageTermino) (*pb.MessageTermino, error) {
 	msgACentral := ""
 	msgACentral = labName + " a terminado su ejecución"
@@ -85,7 +85,7 @@ func (s *server) FinPrograma(ctx context.Context, msgCentral *pb.MessageTermino)
 
 func main() {
 	helpQueue := "SOS"   //nombre de la cola
-	hostQ := "dist093" //ip del servidor de RabbitMQ 172.17.0.1
+	hostQ := "dist093" //ip del servidor de RabbitMQ 
 
 	/******************Conexión cola síncrona (proto)******************/
 	go func() {
@@ -124,10 +124,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	//msgEnviado := false
 
 	for {
-		//fmt.Println("msgenviado", msgEnviado)
+		
 		if !msgEnviado {
 
 			//Mensaje enviado a la cola de RabbitMQ (Llamado de emergencia)
@@ -175,10 +174,10 @@ func statusUpdateEstallido() bool {
 	random := rand.Intn(max-min) + min
 
 	if random < 5 {
-		estallido = true //true
+		estallido = true 
 		fmt.Println("Analizando estado Laboratorio: [ESTALLIDO]")
 	} else {
-		estallido = false //false
+		estallido = false 
 		fmt.Println("Analizando estado Laboratorio: [OK]")
 	}
 

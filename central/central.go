@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	pb "Laboratorio1Distribuidos/proto"
+	pb "Tarea1-Grupo24/proto"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
@@ -22,7 +22,7 @@ var (
 	cont=1
 	cont2=1
 	helpQueue = "SOS"       //Nombre de la cola
-	hostQ     = "localhost" //Host de RabbitMQ 172.17.0.1
+	hostQ     = "localhost" //Host de RabbitMQ
 	hostS     = [4]string{"dist093","dist094","dist095","dist096"} //Host de un Laboratorio
 )
 
@@ -199,12 +199,6 @@ func main() {
 						EndSignal: true,
 						MsgFin:    "Lab termine su ejecucion",
 					})
-				// if errFin != nil {
-				//  	panic("No se puede crear el mensaje " + err.Error())
-				//  }
-				//lab envian señal de vuelta -> 4 señales antes de morir
-				//fmt.Println(resFin.MsgFin)
-				//fmt.Println(sig)
 				time.Sleep(1*time.Second)
 				
 				fmt.Println("SEACABO!!")
